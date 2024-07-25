@@ -13,7 +13,7 @@ class PokemonStatsPredictor:
         return predictions
 
 # Load and preprocess the dataset for reference (not for training)
-df = pd.read_csv("data/Pokemon.csv")
+df = pd.read_csv("Pokemon.csv")
 df['Type 1'] = df['Type 1'].str.lower()
 df['Type 2'] = df['Type 2'].str.lower()
 
