@@ -44,7 +44,7 @@ iv_attack = cols[1].slider("Select IV for Attack (0-31):", min_value=0, max_valu
 iv_defense = cols[2].slider("Select IV for Defense (0-31):", min_value=0, max_value=31, value=0)
 iv_sp_atk = cols[0].slider("Select IV for Sp. Atk (0-31):", min_value=0, max_value=31, value=0)
 iv_sp_def = cols[1].slider("Select IV for Sp. Def (0-31):", min_value=0, max_value=31, value=0)
-iv_speed = cols[2].slider("Select IV for Speed (0-31):", min_value=0, max=31, value=0)
+iv_speed = cols[2].slider("Select IV for Speed (0-31):", min_value=0, max_value=31, value=0)
 
 st.header("Effort Values (EVs)")
 st.markdown("**Total EVs across all stats cannot exceed 510. Each stat can receive up to 252 EVs, and EVs can be set in increments of 4.**")
