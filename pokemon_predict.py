@@ -170,9 +170,10 @@ if st.button("Predict Stats"):
     # Calculate the best and worst stats based on nature, IVs, and EVs
     # Display the predicted stats
     st.subheader("Predicted Stats")
-    st.write(f"**Legendary Status:** {'Yes' if is_legendary else 'No'}")
-    st.write(f"**Type:** {type_1.capitalize()}{' / ' + type_2.capitalize() if type_2 else ''}")
-    st.write(f"**Generation:** {generation}")
+    legendary_status = "Legendary" if is_legendary else "Non-Legendary"
+    type_info = f"{type_1.capitalize()}{f' / {type_2.capitalize()}' if type_2 else ''}"
+    st.write(f"This is a {legendary_status} {type_info} Pokémon from Generation {generation}.")
+
 
     st.write("---")
     st.write("### Stats Overview")
@@ -184,7 +185,7 @@ if st.button("Predict Stats"):
 
         st.markdown(f"""
         **{stat}:**
-        - **Predicted:** {base_stat:.2f}
+        - **Predicted base stat:** {base_stat:.2f}
         - **Best:** {best_stat:.2f}
         - **Worst:** {worst_stat:.2f}
         - **Adjusted:** {actual_stat:.2f} (based on selected IVs, EVs, and Nature)
