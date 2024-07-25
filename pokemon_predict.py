@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 import joblib
+import math
 
 class PokemonStatsPredictor:
     def __init__(self):
@@ -75,17 +76,21 @@ nature_effects = {
     'Calm': ('Sp. Def', 'Attack'), 'Gentle': ('Sp. Def', 'Defense'), 'Sassy': ('Sp. Def', 'Speed'), 'Careful': ('Sp. Def', 'Sp. Atk'), 'Quirky': (None, None)
 }
 
-# Function to apply nature adjustments
-def apply_nature(stat_name, base_value, iv_value, ev_value):
+# Function to apply nature adjustments and calculate best/worst stats
+def apply_nature_and_calculate_stats(stat_name, base_value, iv_value, ev_value):
     increase, decrease = nature_effects[nature]
     nature_multiplier = 1.1 if increase == stat_name else 0.9 if decrease == stat_name else 1.0
     
     if stat_name == 'HP':
-        user_predicted_stat = (((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100) + 100 + 10
+        worst_stat = ((2 * base_value * 100) / 100 + 100 + 10)
+        best_stat = (((2 * base_value + 31 + 63) * 100) / 100 + 100 + 10)
+        user_predicted_stat = math.floor((((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100) + 100 + 10)
     else:
-        user_predicted_stat = (((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100 + 5) * nature_multiplier
+        worst_stat = ((2 * base_value * 100) / 100 + 5) * 0.9
+        best_stat = (((2 * base_value + 31 + 252 / 4) * 100) / 100 + 5) * 1.1
+        user_predicted_stat = math.floor((((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100 + 5) * nature_multiplier)
     
-    return user_predicted_stat
+    return user_predicted_stat, math.floor(worst_stat), math.floor(best_stat)
 
 # Main prediction and display logic
 if st.button("Predict Stats"):
@@ -151,5 +156,11 @@ if st.button("Predict Stats"):
     for stat, value in predicted_stats.items():
         st.write(f"  {stat}: {value[0]}")
 
-    # Further adjustments based on nature, IVs, and EVs can be displayed here if needed
-    
+    # Calculate and display best and worst stats based on nature, IVs, and EVs
+    st.header("Stats with Adjustments")
+    for stat in ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']:
+        base_value = predicted_stats[stat][0]
+        iv_value = locals()[f'iv_{stat.lower()}']
+        ev_value = locals()[f'ev_{stat.lower()}']
+        adjusted_stat, worst_stat, best_stat = apply_nature_and_calculate_stats(stat, base_value, iv_value, ev_value)
+        st.write(f"{stat}: Adjusted: {adjusted_stat}, Best: {best_stat}, Worst: {worst_stat}")
