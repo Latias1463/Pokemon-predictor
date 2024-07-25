@@ -122,7 +122,7 @@ if st.button("Predict Stats"):
     y = combined_df_encoded[['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']]
 
     # Load the pre-trained model
-    predictor = joblib.load('C:/Users/Latia/OneDrive/Documents/pokemon_meta_model.joblib')
+    predictor = joblib.load('pokemon_meta_model.joblib')
 
     # Prepare the input for the hypothetical Pokémon
     input_data = {
