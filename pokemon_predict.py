@@ -46,6 +46,16 @@ iv_sp_atk = cols[0].slider("Select IV for Sp. Atk (0-31):", min_value=0, max_val
 iv_sp_def = cols[1].slider("Select IV for Sp. Def (0-31):", min_value=0, max_value=31, value=0)
 iv_speed = cols[2].slider("Select IV for Speed (0-31):", min_value=0, max_value=31, value=0)
 
+# Collecting IVs in a dictionary
+iv_values = {
+    'HP': iv_hp,
+    'Attack': iv_attack,
+    'Defense': iv_defense,
+    'Sp. Atk': iv_sp_atk,
+    'Sp. Def': iv_sp_def,
+    'Speed': iv_speed,
+}
+
 st.header("Effort Values (EVs)")
 st.markdown("**Total EVs across all stats cannot exceed 510. Each stat can receive up to 252 EVs, and EVs can be set in increments of 4.**")
 ev_hp = st.slider("Select EV for HP (0-252):", min_value=0, max_value=252, step=4, value=0)
@@ -58,6 +68,16 @@ ev_speed = st.slider("Select EV for Speed (0-252):", min_value=0, max_value=252,
 total_ev_allocated = ev_hp + ev_attack + ev_defense + ev_sp_atk + ev_sp_def + ev_speed
 if total_ev_allocated > 510:
     st.warning(f"Total EVs allocated exceed the limit of 510. Current total: {total_ev_allocated}")
+
+# Collecting EVs in a dictionary
+ev_values = {
+    'HP': ev_hp,
+    'Attack': ev_attack,
+    'Defense': ev_defense,
+    'Sp. Atk': ev_sp_atk,
+    'Sp. Def': ev_sp_def,
+    'Speed': ev_speed,
+}
 
 st.header("Nature Selection")
 nature = st.selectbox("Select Nature:", [
@@ -150,8 +170,8 @@ if st.button("Predict Stats"):
     # Calculate the best and worst stats based on nature, IVs, and EVs
     stat_names = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']
     for stat in stat_names:
-        iv_value = locals()[f'iv_{stat.lower().replace(" ", "_")}']
-        ev_value = locals()[f'ev_{stat.lower().replace(" ", "_")}']
+        iv_value = iv_values[stat]
+        ev_value = ev_values[stat]
         base_stat = predicted_stats[stat][0]
         best_stat = apply_nature(stat, base_stat, 31, 252)  # IVs max at 31, EVs max at 252
         worst_stat = apply_nature(stat, base_stat, 0, 0)    # IVs min at 0, EVs at 0
