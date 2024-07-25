@@ -3,31 +3,15 @@ import streamlit as st
 import joblib
 import math
 
-# Define the same class that was used during model training
 class PokemonStatsPredictor:
     def __init__(self):
-        self.models = {
-            'HP': DecisionTreeRegressor(random_state=42),
-            'Attack': DecisionTreeRegressor(random_state=42),
-            'Defense': DecisionTreeRegressor(random_state=42),
-            'Sp. Atk': DecisionTreeRegressor(random_state=42),
-            'Sp. Def': DecisionTreeRegressor(random_state=42),
-            'Speed': DecisionTreeRegressor(random_state=42),
-        }
-
-    def train(self, X_train, y_train):
-        for stat, model in self.models.items():
-            model.fit(X_train, y_train[stat])
+        self.models = joblib.load('pokemon_meta_model.joblib')
 
     def predict(self, X_test):
         predictions = {}
         for stat, model in self.models.items():
             predictions[stat] = model.predict(X_test)
         return predictions
-
-# Load the pre-trained model
-model_path = "pokemon_meta_model.joblib"
-predictor = joblib.load(model_path)
 
 # Load and preprocess the dataset for reference (not for training)
 df = pd.read_csv("Pokemon.csv")
@@ -40,7 +24,6 @@ st.markdown("""
 This is the Pokémon Stats Predictor. This tool helps you predict the stats of a hypothetical Pokémon based on their attributes.
 """)
 
-# User inputs for Pokémon characteristics
 st.header("Pokémon Characteristics")
 st.subheader("Type Selection")
 types = list(df['Type 1'].unique())
@@ -61,7 +44,7 @@ iv_attack = cols[1].slider("Select IV for Attack (0-31):", min_value=0, max_valu
 iv_defense = cols[2].slider("Select IV for Defense (0-31):", min_value=0, max_value=31, value=0)
 iv_sp_atk = cols[0].slider("Select IV for Sp. Atk (0-31):", min_value=0, max_value=31, value=0)
 iv_sp_def = cols[1].slider("Select IV for Sp. Def (0-31):", min_value=0, max_value=31, value=0)
-iv_speed = cols[2].slider("Select IV for Speed (0-31):", min_value=0, max_value=31, value=0)
+iv_speed = cols[2].slider("Select IV for Speed (0-31):", min_value=0, max=31, value=0)
 
 st.header("Effort Values (EVs)")
 st.markdown("**Total EVs across all stats cannot exceed 510. Each stat can receive up to 252 EVs, and EVs can be set in increments of 4.**")
@@ -93,14 +76,15 @@ nature_effects = {
     'Calm': ('Sp. Def', 'Attack'), 'Gentle': ('Sp. Def', 'Defense'), 'Sassy': ('Sp. Def', 'Speed'), 'Careful': ('Sp. Def', 'Sp. Atk'), 'Quirky': (None, None)
 }
 
+# Function to apply nature adjustments
 def apply_nature(stat_name, base_value, iv_value, ev_value):
     increase, decrease = nature_effects[nature]
     nature_multiplier = 1.1 if increase == stat_name else 0.9 if decrease == stat_name else 1.0
-
+    
     if stat_name == 'HP':
-        user_predicted_stat = math.floor((((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100) + 100 + 10)
+        user_predicted_stat = (((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100) + 100 + 10
     else:
-        user_predicted_stat = math.floor((((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100 + 5) * nature_multiplier)
+        user_predicted_stat = (((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100 + 5) * nature_multiplier
     
     return user_predicted_stat
 
@@ -137,6 +121,9 @@ if st.button("Predict Stats"):
         X = combined_df_encoded.drop(['Total', 'Name'], axis=1)
     y = combined_df_encoded[['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']]
 
+    # Load the pre-trained model
+    predictor = joblib.load('C:/Users/Latia/OneDrive/Documents/pokemon_meta_model.joblib')
+
     # Prepare the input for the hypothetical Pokémon
     input_data = {
         'HP': avg_stats_combined['HP'],
@@ -160,16 +147,14 @@ if st.button("Predict Stats"):
     # Predict the individual stats for the hypothetical Pokémon
     predicted_stats = predictor.predict(input_df_encoded)
 
-    # Display the predicted stats
-    st.write(f"Predicted Stats for {'Legendary' if is_legendary else 'Non-Legendary'} {type_1.capitalize()}/{type_2.capitalize() if type_2 else ''} Type Pokémon (Generation {generation}):")
-    for stat, value in predicted_stats.items():
-        st.write(f"  {stat}: {value[0]}")
-    
-    # Calculate and display the best and worst possible stats at level 100
-    for stat, base_value in predicted_stats.items():
-        iv_value = locals()[f'iv_{stat.lower()}']
-        ev_value = locals()[f'ev_{stat.lower()}']
-        best_stat = apply_nature(stat, base_value[0], iv_value, ev_value)
-        worst_stat = apply_nature(stat, base_value[0], 0, 0)  # Using 0 IVs and EVs for worst stats
+    # Calculate the best and worst stats based on nature, IVs, and EVs
+    stat_names = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']
+    for stat in stat_names:
+        iv_value = locals()[f'iv_{stat.lower().replace(" ", "_")}']
+        ev_value = locals()[f'ev_{stat.lower().replace(" ", "_")}']
+        base_stat = predicted_stats[stat][0]
+        best_stat = apply_nature(stat, base_stat, 31, 252)  # IVs max at 31, EVs max at 252
+        worst_stat = apply_nature(stat, base_stat, 0, 0)    # IVs min at 0, EVs at 0
+        actual_stat = apply_nature(stat, base_stat, iv_value, ev_value)
 
-        st.write(f"{stat}: Best Stat: {best_stat}, Worst Stat: {worst_stat}")
+        st.write(f"{stat}: Predicted: {base_stat}, Best: {best_stat}, Worst: {worst_stat}, Adjusted: {actual_stat}")
