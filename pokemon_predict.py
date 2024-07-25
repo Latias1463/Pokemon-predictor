@@ -3,18 +3,9 @@ import streamlit as st
 import joblib
 import math
 
-class PokemonStatsPredictor:
-    def __init__(self, model_path='pokemon_meta_model.joblib'):
-        self.models = joblib.load(model_path)
-
-    def predict(self, X_test):
-        predictions = {}
-        if hasattr(self.models, 'items'):  # Ensure models is a dictionary
-            for stat, model in self.models.items():
-                predictions[stat] = model.predict(X_test)
-        else:
-            raise ValueError("Model file does not contain the expected format.")
-        return predictions
+# Load the pre-trained model
+model_path = r"C:\Users\Latia\OneDrive\Documents\pokemon_meta_model.joblib"
+predictor = joblib.load(model_path)
 
 # Load and preprocess the dataset for reference (not for training)
 df = pd.read_csv("Pokemon.csv")
@@ -27,6 +18,7 @@ st.markdown("""
 This is the Pokémon Stats Predictor. This tool helps you predict the stats of a hypothetical Pokémon based on their attributes.
 """)
 
+# User inputs for Pokémon characteristics
 st.header("Pokémon Characteristics")
 st.subheader("Type Selection")
 types = list(df['Type 1'].unique())
@@ -79,21 +71,16 @@ nature_effects = {
     'Calm': ('Sp. Def', 'Attack'), 'Gentle': ('Sp. Def', 'Defense'), 'Sassy': ('Sp. Def', 'Speed'), 'Careful': ('Sp. Def', 'Sp. Atk'), 'Quirky': (None, None)
 }
 
-# Function to apply nature adjustments and calculate best/worst stats
-def apply_nature_and_calculate_stats(stat_name, base_value, iv_value, ev_value):
+def apply_nature(stat_name, base_value, iv_value, ev_value):
     increase, decrease = nature_effects[nature]
     nature_multiplier = 1.1 if increase == stat_name else 0.9 if decrease == stat_name else 1.0
-    
+
     if stat_name == 'HP':
-        worst_stat = ((2 * base_value * 100) / 100 + 100 + 10)
-        best_stat = (((2 * base_value + 31 + 63) * 100) / 100 + 100 + 10)
         user_predicted_stat = math.floor((((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100) + 100 + 10)
     else:
-        worst_stat = ((2 * base_value * 100) / 100 + 5) * 0.9
-        best_stat = (((2 * base_value + 31 + 252 / 4) * 100) / 100 + 5) * 1.1
         user_predicted_stat = math.floor((((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100 + 5) * nature_multiplier)
     
-    return user_predicted_stat, math.floor(worst_stat), math.floor(best_stat)
+    return user_predicted_stat
 
 # Main prediction and display logic
 if st.button("Predict Stats"):
@@ -128,9 +115,6 @@ if st.button("Predict Stats"):
         X = combined_df_encoded.drop(['Total', 'Name'], axis=1)
     y = combined_df_encoded[['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']]
 
-    # Load the pre-trained model
-    predictor = PokemonStatsPredictor()
-
     # Prepare the input for the hypothetical Pokémon
     input_data = {
         'HP': avg_stats_combined['HP'],
@@ -158,12 +142,12 @@ if st.button("Predict Stats"):
     st.write(f"Predicted Stats for {'Legendary' if is_legendary else 'Non-Legendary'} {type_1.capitalize()}/{type_2.capitalize() if type_2 else ''} Type Pokémon (Generation {generation}):")
     for stat, value in predicted_stats.items():
         st.write(f"  {stat}: {value[0]}")
-
-    # Calculate and display best and worst stats based on nature, IVs, and EVs
-    st.header("Stats with Adjustments")
-    for stat in ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']:
-        base_value = predicted_stats[stat][0]
+    
+    # Calculate and display the best and worst possible stats at level 100
+    for stat, base_value in predicted_stats.items():
         iv_value = locals()[f'iv_{stat.lower()}']
         ev_value = locals()[f'ev_{stat.lower()}']
-        adjusted_stat, worst_stat, best_stat = apply_nature_and_calculate_stats(stat, base_value, iv_value, ev_value)
-        st.write(f"{stat}: Adjusted: {adjusted_stat}, Best: {best_stat}, Worst: {worst_stat}")
+        best_stat = apply_nature(stat, base_value[0], iv_value, ev_value)
+        worst_stat = apply_nature(stat, base_value[0], 0, 0)  # Using 0 IVs and EVs for worst stats
+
+        st.write(f"{stat}: Best Stat: {best_stat}, Worst Stat: {worst_stat}")
