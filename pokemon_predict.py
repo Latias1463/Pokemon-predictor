@@ -4,7 +4,7 @@ import joblib
 import math
 
 # Load the pre-trained model
-model_path = r"C:\Users\Latia\OneDrive\Documents\pokemon_meta_model.joblib"
+model_path = "pokemon_meta_model.joblib"
 predictor = joblib.load(model_path)
 
 # Load and preprocess the dataset for reference (not for training)
