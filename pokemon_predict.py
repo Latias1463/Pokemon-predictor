@@ -144,7 +144,7 @@ if st.button("Predict Stats"):
     # Load the pre-trained model
     predictor = joblib.load('pokemon_meta_model.joblib')
 
-# Prepare the input for the hypothetical Pokémon
+    # Prepare the input for the hypothetical Pokémon
     input_data = {
         'HP': avg_stats_combined['HP'],
         'Attack': avg_stats_combined['Attack'],
@@ -168,14 +168,12 @@ if st.button("Predict Stats"):
     
     # Predict the individual stats for the hypothetical Pokémon
     predicted_stats = predictor.predict(input_df_encoded)
-    # Calculate the best and worst stats based on nature, IVs, and EVs
+    
     # Display the predicted stats
     st.subheader("Predicted Stats")
     legendary_status = "Legendary" if is_legendary else "Non-Legendary"
     type_info = f"{type_1.capitalize()}{f' / {type_2.capitalize()}' if type_2 else ''}"
     st.write(f"This is a {legendary_status} {type_info} Pokémon from Generation {generation}.")
-
-
     st.write("---")
     st.write("### Stats Overview")
     for stat in predicted_stats:
