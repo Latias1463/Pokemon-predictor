@@ -61,11 +61,11 @@ if total_ev_allocated > 510:
 
 st.header("Nature Selection")
 nature = st.selectbox("Select Nature:", [
-    'Hardy': (None, None), 'Lonely': ('Attack', 'Defense'), 'Brave': ('Attack', 'Speed'), 'Adamant': ('Attack', 'Sp. Atk'), 'Naughty': ('Attack', 'Sp. Def'),
-    'Bold': ('Defense', 'Attack'), 'Docile': (None, None), 'Relaxed': ('Defense', 'Speed'), 'Impish': ('Defense', 'Sp. Atk'), 'Lax': ('Defense', 'Sp. Def'),
-    'Timid': ('Speed', 'Attack'), 'Hasty': ('Speed', 'Defense'), 'Serious': (None, None), 'Jolly': ('Speed', 'Sp. Atk'), 'Naive': ('Speed', 'Sp. Def'),
-    'Modest': ('Sp. Atk', 'Attack'), 'Mild': ('Sp. Atk', 'Defense'), 'Quiet': ('Sp. Atk', 'Speed'), 'Bashful': (None, None), 'Rash': ('Sp. Atk', 'Sp. Def'),
-    'Calm': ('Sp. Def', 'Attack'), 'Gentle': ('Sp. Def', 'Defense'), 'Sassy': ('Sp. Def', 'Speed'), 'Careful': ('Sp. Def', 'Sp. Atk'), 'Quirky': (None, None)
+    "Hardy: (None, None)", "Lonely: ('Attack', 'Defense')", "Brave: ('Attack', 'Speed')", "Adamant: ('Attack', 'Sp. Atk')", "Naughty: ('Attack', 'Sp. Def')",
+    "Bold: ('Defense', 'Attack')", "Docile: (None, None)", "Relaxed: ('Defense', 'Speed')", "Impish: ('Defense', 'Sp. Atk')", "Lax: ('Defense', 'Sp. Def')",
+    "Timid: ('Speed', 'Attack')", "Hasty: ('Speed', 'Defense')", "Serious: (None, None)", "Jolly: ('Speed', 'Sp. Atk')", "Naive: ('Speed', 'Sp. Def')",
+    "Modest: ('Sp. Atk', 'Attack')", "Mild: ('Sp. Atk', 'Defense')", "Quiet: ('Sp. Atk', 'Speed')", "Bashful: (None, None)", "Rash: ('Sp. Atk', 'Sp. Def')",
+    "Calm: ('Sp. Def', 'Attack')", "Gentle: ('Sp. Def', 'Defense')", "Sassy: ('Sp. Def', 'Speed')", "Careful: ('Sp. Def', 'Sp. Atk')", "Quirky: (None, None)"
 ])
 
 nature_effects = {
