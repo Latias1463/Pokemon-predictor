@@ -168,13 +168,24 @@ if st.button("Predict Stats"):
     predicted_stats = predictor.predict(input_df_encoded)
 
     # Calculate the best and worst stats based on nature, IVs, and EVs
-    stat_names = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']
-    for stat in stat_names:
-        iv_value = iv_values[stat]
-        ev_value = ev_values[stat]
+    # Display the predicted stats
+    st.subheader("Predicted Stats")
+    st.write(f"**Legendary Status:** {'Yes' if is_legendary else 'No'}")
+    st.write(f"**Type:** {type_1.capitalize()}{' / ' + type_2.capitalize() if type_2 else ''}")
+    st.write(f"**Generation:** {generation}")
+
+    st.write("---")
+    st.write("### Stats Overview")
+    for stat in predicted_stats:
         base_stat = predicted_stats[stat][0]
         best_stat = apply_nature(stat, base_stat, 31, 252)  # IVs max at 31, EVs max at 252
         worst_stat = apply_nature(stat, base_stat, 0, 0)    # IVs min at 0, EVs at 0
-        actual_stat = apply_nature(stat, base_stat, iv_value, ev_value)
+        actual_stat = apply_nature(stat, base_stat, iv_values[stat], ev_values[stat])
 
-        st.write(f"{stat}: Predicted: {base_stat}, Best: {best_stat}, Worst: {worst_stat}, Adjusted: {actual_stat}")
+        st.markdown(f"""
+        **{stat}:**
+        - **Predicted:** {base_stat:.2f}
+        - **Best:** {best_stat:.2f}
+        - **Worst:** {worst_stat:.2f}
+        - **Adjusted:** {actual_stat:.2f} (based on selected IVs, EVs, and Nature)
+        """)
