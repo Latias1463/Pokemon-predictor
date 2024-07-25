@@ -144,7 +144,7 @@ if st.button("Predict Stats"):
     # Load the pre-trained model
     predictor = joblib.load('pokemon_meta_model.joblib')
 
-    # Prepare the input for the hypothetical Pokémon
+# Prepare the input for the hypothetical Pokémon
     input_data = {
         'HP': avg_stats_combined['HP'],
         'Attack': avg_stats_combined['Attack'],
@@ -156,17 +156,18 @@ if st.button("Predict Stats"):
     }
     if type_2:
         input_data[f'Type 2_{type_2}'] = 1
-
+    
     # Convert input_data to a DataFrame
     input_df = pd.DataFrame(input_data, index=[0])
-
+    
     # One-hot encode the input_df to match the training data format
     input_df_encoded = pd.get_dummies(input_df)
+    
+    # Ensure that all columns from the training data are present in the input data
     input_df_encoded = input_df_encoded.reindex(columns=X.columns, fill_value=0)
-
+    
     # Predict the individual stats for the hypothetical Pokémon
     predicted_stats = predictor.predict(input_df_encoded)
-
     # Calculate the best and worst stats based on nature, IVs, and EVs
     # Display the predicted stats
     st.subheader("Predicted Stats")
