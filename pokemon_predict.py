@@ -6,6 +6,8 @@ import math
 class PokemonStatsPredictor:
     def __init__(self):
         self.models = joblib.load('pokemon_meta_model.joblib')
+        # Load expected columns from a saved file (this should have been saved during training)
+        self.expected_columns = joblib.load('expected_columns.joblib')
 
     def predict(self, X_test):
         predictions = {}
@@ -164,7 +166,7 @@ if st.button("Predict Stats"):
     input_df_encoded = pd.get_dummies(input_df)
     
     # Ensure that all columns from the training data are present in the input data
-    input_df_encoded = input_df_encoded.reindex(columns=X.columns, fill_value=0)
+    input_df_encoded = input_df_encoded.reindex(columns=predictor.expected_columns, fill_value=0)
     
     # Predict the individual stats for the hypothetical Pokémon
     predicted_stats = predictor.predict(input_df_encoded)
