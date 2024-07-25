@@ -9,8 +9,11 @@ class PokemonStatsPredictor:
 
     def predict(self, X_test):
         predictions = {}
-        for stat, model in self.models.items():
-            predictions[stat] = model.predict(X_test)
+        if hasattr(self.models, 'items'):  # Ensure models is a dictionary
+            for stat, model in self.models.items():
+                predictions[stat] = model.predict(X_test)
+        else:
+            raise ValueError("Model file does not contain the expected format.")
         return predictions
 
 # Load and preprocess the dataset for reference (not for training)
@@ -60,12 +63,12 @@ if total_ev_allocated > 510:
     st.warning(f"Total EVs allocated exceed the limit of 510. Current total: {total_ev_allocated}")
 
 st.header("Nature Selection")
-nature = st.selectbox("Select Nature(increase,decrease):", [
-    "Hardy: (None, None)", "Lonely: ('Attack', 'Defense')", "Brave: ('Attack', 'Speed')", "Adamant: ('Attack', 'Sp. Atk')", "Naughty: ('Attack', 'Sp. Def')",
-    "Bold: ('Defense', 'Attack')", "Docile: (None, None)", "Relaxed: ('Defense', 'Speed')", "Impish: ('Defense', 'Sp. Atk')", "Lax: ('Defense', 'Sp. Def')",
-    "Timid: ('Speed', 'Attack')", "Hasty: ('Speed', 'Defense')", "Serious: (None, None)", "Jolly: ('Speed', 'Sp. Atk')", "Naive: ('Speed', 'Sp. Def')",
-    "Modest: ('Sp. Atk', 'Attack')", "Mild: ('Sp. Atk', 'Defense')", "Quiet: ('Sp. Atk', 'Speed')", "Bashful: (None, None)", "Rash: ('Sp. Atk', 'Sp. Def')",
-    "Calm: ('Sp. Def', 'Attack')", "Gentle: ('Sp. Def', 'Defense')", "Sassy: ('Sp. Def', 'Speed')", "Careful: ('Sp. Def', 'Sp. Atk')", "Quirky: (None, None)"
+nature = st.selectbox("Select Nature:", [
+    'Hardy', 'Lonely', 'Brave', 'Adamant', 'Naughty',
+    'Bold', 'Docile', 'Relaxed', 'Impish', 'Lax',
+    'Timid', 'Hasty', 'Serious', 'Jolly', 'Naive',
+    'Modest', 'Mild', 'Quiet', 'Bashful', 'Rash',
+    'Calm', 'Gentle', 'Sassy', 'Careful', 'Quirky'
 ])
 
 nature_effects = {
