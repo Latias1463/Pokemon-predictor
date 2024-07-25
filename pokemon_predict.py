@@ -3,6 +3,28 @@ import streamlit as st
 import joblib
 import math
 
+# Define the same class that was used during model training
+class PokemonStatsPredictor:
+    def __init__(self):
+        self.models = {
+            'HP': DecisionTreeRegressor(random_state=42),
+            'Attack': DecisionTreeRegressor(random_state=42),
+            'Defense': DecisionTreeRegressor(random_state=42),
+            'Sp. Atk': DecisionTreeRegressor(random_state=42),
+            'Sp. Def': DecisionTreeRegressor(random_state=42),
+            'Speed': DecisionTreeRegressor(random_state=42),
+        }
+
+    def train(self, X_train, y_train):
+        for stat, model in self.models.items():
+            model.fit(X_train, y_train[stat])
+
+    def predict(self, X_test):
+        predictions = {}
+        for stat, model in self.models.items():
+            predictions[stat] = model.predict(X_test)
+        return predictions
+
 # Load the pre-trained model
 model_path = "pokemon_meta_model.joblib"
 predictor = joblib.load(model_path)
