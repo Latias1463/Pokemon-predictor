@@ -60,7 +60,7 @@ if total_ev_allocated > 510:
     st.warning(f"Total EVs allocated exceed the limit of 510. Current total: {total_ev_allocated}")
 
 st.header("Nature Selection")
-nature = st.selectbox("Select Nature:", [
+nature = st.selectbox("Select Nature(increase,decrease):", [
     "Hardy: (None, None)", "Lonely: ('Attack', 'Defense')", "Brave: ('Attack', 'Speed')", "Adamant: ('Attack', 'Sp. Atk')", "Naughty: ('Attack', 'Sp. Def')",
     "Bold: ('Defense', 'Attack')", "Docile: (None, None)", "Relaxed: ('Defense', 'Speed')", "Impish: ('Defense', 'Sp. Atk')", "Lax: ('Defense', 'Sp. Def')",
     "Timid: ('Speed', 'Attack')", "Hasty: ('Speed', 'Defense')", "Serious: (None, None)", "Jolly: ('Speed', 'Sp. Atk')", "Naive: ('Speed', 'Sp. Def')",
