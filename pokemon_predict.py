@@ -51,24 +51,31 @@ class PokemonStatsPredictor:
         return predictions
 
 # Load and preprocess the dataset for reference (not for training)
+# Load and preprocess the dataset for reference (not for training)
 df = pd.read_csv("Pokemon.csv")
 df['Type 1'] = df['Type 1'].str.lower()
 df['Type 2'] = df['Type 2'].str.lower()
-st.title("Pokémon Stats Predictor")
 
-st.markdown("""
-Welcome to the Pokémon Stats Predictor! This tool helps you predict the stats of a hypothetical Pokémon based on various attributes.
-""")
+# Ensure the necessary columns are present
+required_columns = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']
+if all(col in df.columns for col in required_columns):
+    st.title("Pokémon Stats Predictor")
 
-st.subheader("Distribution of Pokémon Stats")
-plt.figure(figsize=(10, 6))
-sns.boxplot(data=df[['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']])
-plt.title('Distribution of Pokémon Stats')
-plt.xticks(rotation=45)
-plt.tight_layout()
+    st.markdown("""
+    Welcome to the Pokémon Stats Predictor! This tool helps you predict the stats of a hypothetical Pokémon based on various attributes.
+    """)
 
-# Display the boxplot in Streamlit
-st.pyplot(plt.gcf())
+    st.subheader("Distribution of Pokémon Stats")
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(data=df[required_columns])
+    plt.title('Distribution of Pokémon Stats')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    # Display the boxplot in Streamlit
+    st.pyplot(plt.gcf())
+else:
+    st.error("The necessary columns for creating the boxplot are missing in the dataset.")
 
 st.header("Pokémon Characteristics")
 st.subheader("Type Selection")
