@@ -50,7 +50,21 @@ df = pd.read_csv("Pokemon.csv")
 df['Type 1'] = df['Type 1'].str.lower()
 df['Type 2'] = df['Type 2'].str.lower()
 required_columns = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']
+st.header("Data Exploration")
+st.write(df.describe())
+st.write("### Correlation Matrix")
+corr_matrix = df[required_columns].corr()
+st.write(corr_matrix)
+sns.heatmap(corr_matrix, annot=True, cmap='coolwarm')
+st.pyplot(plt.gcf())
 
+# Handle missing values (if any)
+missing_data = df.isnull().sum()
+st.write("### Missing Data")
+st.write(missing_data)
+
+# Data Cleaning
+df.fillna(df.median(), inplace=True)
 st.title("Pokémon Stats Predictor")
 
 st.markdown("""
