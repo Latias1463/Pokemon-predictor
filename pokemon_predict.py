@@ -3,6 +3,7 @@ import streamlit as st
 import joblib
 import math
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 class PokemonStatsPredictor:
     def __init__(self):
