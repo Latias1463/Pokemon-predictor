@@ -3,6 +3,8 @@ import streamlit as st
 import joblib
 import math
 
+import joblib
+
 class PokemonStatsPredictor:
     def __init__(self):
         self.models = None
@@ -14,12 +16,12 @@ class PokemonStatsPredictor:
             self.models = joblib.load('pokemon_meta_model.joblib')
             self.expected_columns = joblib.load('expected_columns.joblib')
 
-            # Debug: Check the type and contents of the loaded objects
+            # Debug: Print detailed information about the loaded models
             print(f"Loaded models type: {type(self.models)}")
             print(f"Loaded models content: {self.models}")
             print(f"Loaded expected_columns type: {type(self.expected_columns)}")
             print(f"Loaded expected_columns content: {self.expected_columns}")
-            
+
             # Check if models is a dictionary
             if not isinstance(self.models, dict):
                 raise AttributeError("The loaded model does not contain a valid 'models' attribute.")
@@ -47,9 +49,9 @@ class PokemonStatsPredictor:
                 predictions[stat] = [0]  # Default to 0 if model is missing
         return predictions
 
-# Add this block to ensure the model and columns are loaded correctly
 if __name__ == "__main__":
     predictor = PokemonStatsPredictor()
+
 # Load and preprocess the dataset for reference (not for training)
 df = pd.read_csv("Pokemon.csv")
 df['Type 1'] = df['Type 1'].str.lower()
