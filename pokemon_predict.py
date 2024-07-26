@@ -14,9 +14,13 @@ class PokemonStatsPredictor:
             self.models = joblib.load('pokemon_meta_model.joblib')
             self.expected_columns = joblib.load('expected_columns.joblib')
 
-            # Debug: Check the content of models and expected_columns
+            # Debug: Check the type and contents of the loaded objects
+            print(f"Loaded models type: {type(self.models)}")
+            print(f"Loaded expected_columns type: {type(self.expected_columns)}")
+            
+            # Check if models is a dictionary
             if not isinstance(self.models, dict):
-                raise AttributeError("The loaded model does not contain a valid 'models' attribute.")
+                raise AttributeError("The loaded model does not contain a valid 'models' attribute. Models type: " + str(type(self.models)))
             if not self.expected_columns:
                 raise AttributeError("The loaded 'expected_columns' attribute is missing or empty.")
             
@@ -25,11 +29,14 @@ class PokemonStatsPredictor:
             print(f"Error loading models: {e}")
             self.models = {}
             self.expected_columns = []
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            raise
 
     def predict(self, X_test):
         if not isinstance(self.models, dict):
             raise AttributeError("The 'models' attribute is not a dictionary.")
-
+        
         predictions = {}
         for stat, model in self.models.items():
             if model:
