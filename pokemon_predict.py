@@ -3,8 +3,6 @@ import streamlit as st
 import joblib
 import math
 
-import joblib
-
 class PokemonStatsPredictor:
     def __init__(self):
         self.models = None
@@ -13,15 +11,16 @@ class PokemonStatsPredictor:
 
     def load_models(self):
         try:
-            self.models = joblib.load('pokemon_meta_model.joblib')
-            self.expected_columns = joblib.load('expected_columns.joblib')
-
-            # Debug: Print detailed information about the loaded models
+            model_data = joblib.load('pokemon_meta_model.joblib')
+            self.models = model_data.models
+            self.expected_columns = model_data.expected_columns
+            
+            # Debug: Print detailed information about the loaded models and columns
             print(f"Loaded models type: {type(self.models)}")
             print(f"Loaded models content: {self.models}")
             print(f"Loaded expected_columns type: {type(self.expected_columns)}")
             print(f"Loaded expected_columns content: {self.expected_columns}")
-
+            
             # Check if models is a dictionary
             if not isinstance(self.models, dict):
                 raise AttributeError("The loaded model does not contain a valid 'models' attribute.")
@@ -49,14 +48,10 @@ class PokemonStatsPredictor:
                 predictions[stat] = [0]  # Default to 0 if model is missing
         return predictions
 
-if __name__ == "__main__":
-    predictor = PokemonStatsPredictor()
-
 # Load and preprocess the dataset for reference (not for training)
 df = pd.read_csv("Pokemon.csv")
 df['Type 1'] = df['Type 1'].str.lower()
 df['Type 2'] = df['Type 2'].str.lower()
-
 st.title("Pokémon Stats Predictor")
 
 st.markdown("""
