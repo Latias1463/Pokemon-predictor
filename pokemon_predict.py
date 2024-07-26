@@ -2,12 +2,12 @@ import pandas as pd
 import streamlit as st
 import joblib
 import math
-import matplotlib.pyplot as plt
-import seaborn as sns
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import GridSearchCV
 
 class PokemonStatsPredictor:
     def __init__(self):
-        self.models = None
+        self.models = {}
         self.expected_columns = None
         self.load_models()
 
@@ -17,13 +17,11 @@ class PokemonStatsPredictor:
             self.models = model_data.models
             self.expected_columns = model_data.expected_columns
             
-            # Debug: Print detailed information about the loaded models and columns
             print(f"Loaded models type: {type(self.models)}")
             print(f"Loaded models content: {self.models}")
             print(f"Loaded expected_columns type: {type(self.expected_columns)}")
             print(f"Loaded expected_columns content: {self.expected_columns}")
             
-            # Check if models is a dictionary
             if not isinstance(self.models, dict):
                 raise AttributeError("The loaded model does not contain a valid 'models' attribute.")
             if not isinstance(self.expected_columns, list):
@@ -38,6 +36,17 @@ class PokemonStatsPredictor:
             print(f"Unexpected error: {e}")
             raise
 
+    def train_with_grid_search(self, X_train, y_train):
+        param_grid = {
+            'max_depth': [3, 5, 7, 10],
+            'min_samples_split': [2, 5, 10]
+        }
+        for stat in y_train.columns:
+            grid_search = GridSearchCV(DecisionTreeRegressor(random_state=42), param_grid, cv=5)
+            grid_search.fit(X_train, y_train[stat])
+            self.models[stat] = grid_search.best_estimator_
+            print(f"Best parameters for {stat}: {grid_search.best_params_}")
+
     def predict(self, X_test):
         if not isinstance(self.models, dict):
             raise AttributeError("The 'models' attribute is not a dictionary.")
@@ -47,7 +56,7 @@ class PokemonStatsPredictor:
             if model:
                 predictions[stat] = model.predict(X_test)
             else:
-                predictions[stat] = [0]  # Default to 0 if model is missing
+                predictions[stat] = [0]
         return predictions
 
 # Load and preprocess the dataset for reference (not for training)
