@@ -227,10 +227,10 @@ if st.button("Predict Stats"):
         actual_stat = apply_nature(stat, base_stat, iv_values[stat], ev_values[stat])
         st.markdown(f"""
         **{stat}:**
-        - **Predicted base stat:** {base_stat:.2f}
-        - **Best:** {best_stat:.2f}
-        - **Worst:** {worst_stat:.2f}
-        - **Adjusted:** {actual_stat:.2f} (based on selected IVs, EVs, and Nature)
+        - **Predicted base stat:** {base_stat}
+        - **Best:** {best_stat}
+        - **Worst:** {worst_stat}
+        - **Adjusted:** {actual_stat} (based on selected IVs, EVs, and Nature)
         """)
 
         total_base += base_stat
@@ -238,8 +238,5 @@ if st.button("Predict Stats"):
         total_worst += worst_stat
         total_adjusted += actual_stat
 
-    st.write(f"**Total Predicted Base Stats:** {total_base:.2f}")
-    st.write(f"**Total Best Possible Stats:** {total_best:.2f}")
-    st.write(f"**Total Worst Possible Stats:** {total_worst:.2f}")
-    st.write(f"**Total Adjusted Stats:** {total_adjusted:.2f}")
+    st.write(f"**Total Predicted Base Stats:** {total_base}")
 
