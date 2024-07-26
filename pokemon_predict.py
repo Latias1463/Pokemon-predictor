@@ -137,7 +137,7 @@ nature_effects = {
 def apply_nature(stat_name, base_value, iv_value, ev_value, is_worst=False):
     increase, decrease = nature_effects[nature]
     if is_worst:
-        nature_multiplier = 0.9 if decrease == stat_name else 1.0
+        nature_multiplier = 0.9 
     else:
         nature_multiplier = 1.1 if increase == stat_name else 1.0
     
