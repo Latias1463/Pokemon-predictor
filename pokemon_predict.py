@@ -59,6 +59,8 @@ st.title("Pokémon Stats Predictor")
 st.markdown("""
 Welcome to the Pokémon Stats Predictor! This tool helps you predict the stats of a hypothetical Pokémon based on various attributes.
 """)
+
+st.subheader("Distribution of Pokémon Stats")
 plt.figure(figsize=(10, 6))
 sns.boxplot(data=df[['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']])
 plt.title('Distribution of Pokémon Stats')
@@ -66,9 +68,11 @@ plt.xticks(rotation=45)
 plt.tight_layout()
 
 # Display the boxplot in Streamlit
-st.pyplot(plt)
+st.pyplot(plt.gcf())
+
 st.header("Pokémon Characteristics")
 st.subheader("Type Selection")
+
 
 cols = st.columns(2)
 type_1 = cols[0].selectbox("Select the primary type:", options=df['Type 1'].unique(), index=0).lower()
