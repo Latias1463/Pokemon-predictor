@@ -111,6 +111,7 @@ def apply_nature(stat_name, base_value, iv_value, ev_value):
     return user_predicted_stat
 
 # Main prediction and display logic
+# Main prediction and display logic
 if st.button("Predict Stats"):
     # Filter the dataset based on user input
     if type_2:
@@ -144,7 +145,7 @@ if st.button("Predict Stats"):
     y = combined_df_encoded[['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']]
 
     # Load the pre-trained model
-    predictor = joblib.load('pokemon_meta_model.joblib')
+    predictor = PokemonStatsPredictor()
 
     # Prepare the input for the hypothetical Pokémon
     input_data = {
@@ -178,6 +179,8 @@ if st.button("Predict Stats"):
     st.write(f"This is a {legendary_status} {type_info} Pokémon from Generation {generation}.")
     st.write("---")
     st.write("### Stats Overview")
+
+    total_base, total_best, total_worst, total_adjusted = 0, 0, 0, 0
     for stat in predicted_stats:
         base_stat = predicted_stats[stat][0]
         best_stat = apply_nature(stat, base_stat, 31, 252)  # IVs max at 31, EVs max at 252
@@ -191,3 +194,13 @@ if st.button("Predict Stats"):
         - **Worst:** {worst_stat:.2f}
         - **Adjusted:** {actual_stat:.2f} (based on selected IVs, EVs, and Nature)
         """)
+
+        total_base += base_stat
+        total_best += best_stat
+        total_worst += worst_stat
+        total_adjusted += actual_stat
+
+    st.write(f"**Total Predicted Base Stats:** {total_base:.2f}")
+    st.write(f"**Total Best Possible Stats:** {total_best:.2f}")
+    st.write(f"**Total Worst Possible Stats:** {total_worst:.2f}")
+    st.write(f"**Total Adjusted Stats:** {total_adjusted:.2f}")
