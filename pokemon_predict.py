@@ -1,17 +1,29 @@
-import pandas as pd
-import streamlit as st
 import joblib
-import math
 
 class PokemonStatsPredictor:
     def __init__(self):
-        self.models = joblib.load('pokemon_meta_model.joblib')
-        self.expected_columns = joblib.load('expected_columns.joblib')
+        self.models = None
+        self.expected_columns = None
+        self.load_models()
+
+    def load_models(self):
+        # Load the models and expected columns from joblib files
+        try:
+            self.models = joblib.load('pokemon_meta_model.joblib')
+            self.expected_columns = joblib.load('expected_columns.joblib')
+            # Check if models is a dictionary
+            if not isinstance(self.models, dict):
+                raise AttributeError("The loaded model does not contain a valid 'models' attribute.")
+        except FileNotFoundError as e:
+            print(f"Error loading models: {e}")
+            self.models = {}
+            self.expected_columns = []
 
     def predict(self, X_test):
-        if not hasattr(self, 'models') or not isinstance(self.models, dict):
-            raise AttributeError("The loaded model does not contain a valid 'models' attribute.")
-        
+        # Ensure models attribute is correctly loaded and is a dictionary
+        if not isinstance(self.models, dict):
+            raise AttributeError("The 'models' attribute is not a dictionary.")
+
         predictions = {}
         for stat, model in self.models.items():
             if model:
@@ -19,6 +31,7 @@ class PokemonStatsPredictor:
             else:
                 predictions[stat] = [0]  # Default to 0 if model is missing
         return predictions
+
 
 # Load and preprocess the dataset for reference (not for training)
 df = pd.read_csv("Pokemon.csv")
