@@ -6,13 +6,18 @@ import math
 class PokemonStatsPredictor:
     def __init__(self):
         self.models = joblib.load('pokemon_meta_model.joblib')
-        # Load expected columns from a saved file (this should have been saved during training)
         self.expected_columns = joblib.load('expected_columns.joblib')
 
     def predict(self, X_test):
+        if not hasattr(self, 'models') or not isinstance(self.models, dict):
+            raise AttributeError("The loaded model does not contain a valid 'models' attribute.")
+        
         predictions = {}
         for stat, model in self.models.items():
-            predictions[stat] = model.predict(X_test)
+            if model:
+                predictions[stat] = model.predict(X_test)
+            else:
+                predictions[stat] = [0]  # Default to 0 if model is missing
         return predictions
 
 # Load and preprocess the dataset for reference (not for training)
@@ -110,6 +115,7 @@ def apply_nature(stat_name, base_value, iv_value, ev_value):
     
     return user_predicted_stat
 
+
 # Main prediction and display logic
 # Main prediction and display logic
 if st.button("Predict Stats"):
@@ -170,7 +176,7 @@ if st.button("Predict Stats"):
     input_df_encoded = input_df_encoded.reindex(columns=predictor.expected_columns, fill_value=0)
     
     # Predict the individual stats for the hypothetical Pokémon
-    predicted_stats = predictor.predict(input_df_encoded)
+   predicted_stats = predictor.predict(input_df_encoded)
     
     # Display the predicted stats
     st.subheader("Predicted Stats")
