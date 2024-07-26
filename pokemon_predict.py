@@ -22,9 +22,9 @@ class PokemonStatsPredictor:
             
             # Check if models is a dictionary
             if not isinstance(self.models, dict):
-                raise AttributeError(f"The loaded model does not contain a valid 'models' attribute. Models type: {type(self.models)}")
-            if not self.expected_columns:
-                raise AttributeError("The loaded 'expected_columns' attribute is missing or empty.")
+                raise AttributeError("The loaded model does not contain a valid 'models' attribute.")
+            if not isinstance(self.expected_columns, list):
+                raise AttributeError("The loaded 'expected_columns' attribute is not a list or is empty.")
             
             print("Models and expected columns loaded successfully.")
         except FileNotFoundError as e:
@@ -46,6 +46,7 @@ class PokemonStatsPredictor:
             else:
                 predictions[stat] = [0]  # Default to 0 if model is missing
         return predictions
+
 
 # Load and preprocess the dataset for reference (not for training)
 df = pd.read_csv("Pokemon.csv")
