@@ -47,7 +47,6 @@ class PokemonStatsPredictor:
                 predictions[stat] = [0]  # Default to 0 if model is missing
         return predictions
 
-
 # Load and preprocess the dataset for reference (not for training)
 df = pd.read_csv("Pokemon.csv")
 df['Type 1'] = df['Type 1'].str.lower()
