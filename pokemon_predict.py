@@ -55,27 +55,28 @@ class PokemonStatsPredictor:
 df = pd.read_csv("Pokemon.csv")
 df['Type 1'] = df['Type 1'].str.lower()
 df['Type 2'] = df['Type 2'].str.lower()
-
-# Ensure the necessary columns are present
 required_columns = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']
-if all(col in df.columns for col in required_columns):
-    st.title("Pokémon Stats Predictor")
 
-    st.markdown("""
-    Welcome to the Pokémon Stats Predictor! This tool helps you predict the stats of a hypothetical Pokémon based on various attributes.
-    """)
+st.title("Pokémon Stats Predictor")
 
+st.markdown("""
+Welcome to the Pokémon Stats Predictor! This tool helps you predict the stats of a hypothetical Pokémon based on various attributes.
+""")
+
+required_columns = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']
+missing_columns = [col for col in required_columns if col not in df.columns]
+if missing_columns:
+    st.error(f"The following required columns are missing from the dataset: {missing_columns}")
+else:
     st.subheader("Distribution of Pokémon Stats")
     plt.figure(figsize=(10, 6))
     sns.boxplot(data=df[required_columns])
     plt.title('Distribution of Pokémon Stats')
     plt.xticks(rotation=45)
     plt.tight_layout()
-
+    
     # Display the boxplot in Streamlit
     st.pyplot(plt.gcf())
-else:
-    st.error("The necessary columns for creating the boxplot are missing in the dataset.")
 
 st.header("Pokémon Characteristics")
 st.subheader("Type Selection")
