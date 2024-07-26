@@ -41,8 +41,9 @@ class PokemonStatsPredictor:
         
         predictions = {}
         for stat, model in self.models.items():
-            predictions[stat] = model.predict(X_test)
+            predictions[stat] = [math.floor(pred) for pred in model.predict(X_test)]  # Round down predictions
         return predictions
+
 
 # Load and preprocess the dataset for reference (not for training)
 df = pd.read_csv("Pokemon.csv")
