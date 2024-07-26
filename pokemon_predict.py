@@ -55,16 +55,15 @@ df['Type 2'] = df['Type 2'].str.lower()
 st.title("Pokémon Stats Predictor")
 
 st.markdown("""
-This is the Pokémon Stats Predictor. This tool helps you predict the stats of a hypothetical Pokémon based on their attributes.
+Welcome to the Pokémon Stats Predictor! This tool helps you predict the stats of a hypothetical Pokémon based on various attributes.
 """)
-
-
 
 st.header("Pokémon Characteristics")
 st.subheader("Type Selection")
-types = list(df['Type 1'].unique())
-type_1 = st.selectbox("Select the primary type:", options=types, index=0).lower()
-type_2 = st.selectbox("Select the secondary type (if any):", options=["None"] + types, index=0).lower()
+
+cols = st.columns(2)
+type_1 = cols[0].selectbox("Select the primary type:", options=df['Type 1'].unique(), index=0).lower()
+type_2 = cols[1].selectbox("Select the secondary type (if any):", options=["None"] + list(df['Type 1'].unique()), index=0).lower()
 if type_2 == "none":
     type_2 = None
 
@@ -73,47 +72,32 @@ generation = st.slider("Select the generation (1-9):", min_value=1, max_value=9,
 is_legendary = st.radio("Is the Pokémon legendary?", ["Yes", "No"]).lower() == 'yes'
 
 st.header("Individual Values (IVs)")
-st.markdown("**IVs range from 0 to 31 and contribute to the potential of your Pokémon's stats.**")
-cols = st.columns(3)
-iv_hp = cols[0].slider("Select IV for HP (0-31):", min_value=0, max_value=31, value=0)
-iv_attack = cols[1].slider("Select IV for Attack (0-31):", min_value=0, max_value=31, value=0)
-iv_defense = cols[2].slider("Select IV for Defense (0-31):", min_value=0, max_value=31, value=0)
-iv_sp_atk = cols[0].slider("Select IV for Sp. Atk (0-31):", min_value=0, max_value=31, value=0)
-iv_sp_def = cols[1].slider("Select IV for Sp. Def (0-31):", min_value=0, max_value=31, value=0)
-iv_speed = cols[2].slider("Select IV for Speed (0-31):", min_value=0, max_value=31, value=0)
+st.markdown("IVs range from 0 to 31 and contribute to the potential of your Pokémon's stats.")
+iv_cols = st.columns(6)
+iv_hp = iv_cols[0].slider("HP", min_value=0, max_value=31, value=0)
+iv_attack = iv_cols[1].slider("Attack", min_value=0, max_value=31, value=0)
+iv_defense = iv_cols[2].slider("Defense", min_value=0, max_value=31, value=0)
+iv_sp_atk = iv_cols[3].slider("Sp. Atk", min_value=0, max_value=31, value=0)
+iv_sp_def = iv_cols[4].slider("Sp. Def", min_value=0, max_value=31, value=0)
+iv_speed = iv_cols[5].slider("Speed", min_value=0, max_value=31, value=0)
 
-# Collecting IVs in a dictionary
-iv_values = {
-    'HP': iv_hp,
-    'Attack': iv_attack,
-    'Defense': iv_defense,
-    'Sp. Atk': iv_sp_atk,
-    'Sp. Def': iv_sp_def,
-    'Speed': iv_speed,
-}
+iv_values = {'HP': iv_hp, 'Attack': iv_attack, 'Defense': iv_defense, 'Sp. Atk': iv_sp_atk, 'Sp. Def': iv_sp_def, 'Speed': iv_speed}
 
 st.header("Effort Values (EVs)")
-st.markdown("**Total EVs across all stats cannot exceed 510. Each stat can receive up to 252 EVs, and EVs can be set in increments of 4.**")
-ev_hp = st.slider("Select EV for HP (0-252):", min_value=0, max_value=252, step=4, value=0)
-ev_attack = st.slider("Select EV for Attack (0-252):", min_value=0, max_value=252, step=4, value=0)
-ev_defense = st.slider("Select EV for Defense (0-252):", min_value=0, max_value=252, step=4, value=0)
-ev_sp_atk = st.slider("Select EV for Sp. Atk (0-252):", min_value=0, max_value=252, step=4, value=0)
-ev_sp_def = st.slider("Select EV for Sp. Def (0-252):", min_value=0, max_value=252, step=4, value=0)
-ev_speed = st.slider("Select EV for Speed (0-252):", min_value=0, max_value=252, step=4, value=0)
+st.markdown("Total EVs across all stats cannot exceed 510. Each stat can receive up to 252 EVs, and EVs can be set in increments of 4.")
+ev_cols = st.columns(6)
+ev_hp = ev_cols[0].slider("HP", min_value=0, max_value=252, step=4, value=0)
+ev_attack = ev_cols[1].slider("Attack", min_value=0, max_value=252, step=4, value=0)
+ev_defense = ev_cols[2].slider("Defense", min_value=0, max_value=252, step=4, value=0)
+ev_sp_atk = ev_cols[3].slider("Sp. Atk", min_value=0, max_value=252, step=4, value=0)
+ev_sp_def = ev_cols[4].slider("Sp. Def", min_value=0, max_value=252, step=4, value=0)
+ev_speed = ev_cols[5].slider("Speed", min_value=0, max_value=252, step=4, value=0)
 
 total_ev_allocated = ev_hp + ev_attack + ev_defense + ev_sp_atk + ev_sp_def + ev_speed
 if total_ev_allocated > 510:
     st.warning(f"Total EVs allocated exceed the limit of 510. Current total: {total_ev_allocated}")
 
-# Collecting EVs in a dictionary
-ev_values = {
-    'HP': ev_hp,
-    'Attack': ev_attack,
-    'Defense': ev_defense,
-    'Sp. Atk': ev_sp_atk,
-    'Sp. Def': ev_sp_def,
-    'Speed': ev_speed,
-}
+ev_values = {'HP': ev_hp, 'Attack': ev_attack, 'Defense': ev_defense, 'Sp. Atk': ev_sp_atk, 'Sp. Def': ev_sp_def, 'Speed': ev_speed}
 
 st.header("Nature Selection")
 nature = st.selectbox("Select Nature:", [
@@ -123,6 +107,7 @@ nature = st.selectbox("Select Nature:", [
     'Modest', 'Mild', 'Quiet', 'Bashful', 'Rash',
     'Calm', 'Gentle', 'Sassy', 'Careful', 'Quirky'
 ])
+
 
 nature_effects = {
     'Hardy': (None, None), 'Lonely': ('Attack', 'Defense'), 'Brave': ('Attack', 'Speed'), 'Adamant': ('Attack', 'Sp. Atk'), 'Naughty': ('Attack', 'Sp. Def'),
