@@ -7,59 +7,38 @@ from sklearn.model_selection import GridSearchCV
 
 class PokemonStatsPredictor:
     def __init__(self):
-        self.models = {}
-        self.expected_columns = None
-        self.load_models()
-
-    def load_models(self):
-        try:
-            model_data = joblib.load('pokemon_meta_model.joblib')
-            self.models = model_data.models
-            self.expected_columns = model_data.expected_columns
-            
-            print(f"Loaded models type: {type(self.models)}")
-            print(f"Loaded models content: {self.models}")
-            print(f"Loaded expected_columns type: {type(self.expected_columns)}")
-            print(f"Loaded expected_columns content: {self.expected_columns}")
-            
-            if not isinstance(self.models, dict):
-                raise AttributeError("The loaded model does not contain a valid 'models' attribute.")
-            if not isinstance(self.expected_columns, list):
-                raise AttributeError("The loaded 'expected_columns' attribute is not a list or is empty.")
-            
-            print("Models and expected columns loaded successfully.")
-        except FileNotFoundError as e:
-            print(f"Error loading models: {e}")
-            self.models = {}
-            self.expected_columns = []
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-            raise
-
-    def train_with_grid_search(self, X_train, y_train):
-        param_grid = {
-            'max_depth': [3, 5, 7, 10],
-            'min_samples_split': [2, 5, 10]
+        self.models = {
+            'HP': DecisionTreeRegressor(random_state=42),
+            'Attack': DecisionTreeRegressor(random_state=42),
+            'Defense': DecisionTreeRegressor(random_state=42),
+            'Sp. Atk': DecisionTreeRegressor(random_state=42),
+            'Sp. Def': DecisionTreeRegressor(random_state=42),
+            'Speed': DecisionTreeRegressor(random_state=42),
         }
-        for stat in y_train.columns:
-            grid_search = GridSearchCV(DecisionTreeRegressor(random_state=42), param_grid, cv=5)
-            grid_search.fit(X_train, y_train[stat])
-            self.models[stat] = grid_search.best_estimator_
-            print(f"Best parameters for {stat}: {grid_search.best_params_}")
+        self.expected_columns = None
+        self.grid_search = False  # Set to True if you want to perform Grid Search
+
+    def train(self, X_train, y_train):
+        self.expected_columns = X_train.columns
+        for stat, model in self.models.items():
+            if self.grid_search:
+                param_grid = {
+                    'max_depth': [3, 5, 10],
+                    'min_samples_split': [2, 5, 10]
+                }
+                grid_search = GridSearchCV(model, param_grid, cv=5, scoring='neg_mean_squared_error')
+                grid_search.fit(X_train, y_train[stat])
+                best_model = grid_search.best_estimator_
+                self.models[stat] = best_model
+            else:
+                model.fit(X_train, y_train[stat])
 
     def predict(self, X_test):
-        if not isinstance(self.models, dict):
-            raise AttributeError("The 'models' attribute is not a dictionary.")
-        
         predictions = {}
         for stat, model in self.models.items():
-            if model:
-                predictions[stat] = model.predict(X_test)
-            else:
-                predictions[stat] = [0]
+            predictions[stat] = model.predict(X_test)
         return predictions
 
-# Load and preprocess the dataset for reference (not for training)
 # Load and preprocess the dataset for reference (not for training)
 df = pd.read_csv("Pokemon.csv")
 df['Type 1'] = df['Type 1'].str.lower()
@@ -72,24 +51,8 @@ st.markdown("""
 Welcome to the Pokémon Stats Predictor! This tool helps you predict the stats of a hypothetical Pokémon based on various attributes.
 """)
 
-required_columns = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']
-missing_columns = [col for col in required_columns if col not in df.columns]
-if missing_columns:
-    st.error(f"The following required columns are missing from the dataset: {missing_columns}")
-else:
-    st.subheader("Distribution of Pokémon Stats")
-    plt.figure(figsize=(10, 6))
-    sns.boxplot(data=df[required_columns])
-    plt.title('Distribution of Pokémon Stats')
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    
-    # Display the boxplot in Streamlit
-    st.pyplot(plt.gcf())
-
 st.header("Pokémon Characteristics")
 st.subheader("Type Selection")
-
 
 cols = st.columns(2)
 type_1 = cols[0].selectbox("Select the primary type:", options=df['Type 1'].unique(), index=0).lower()
@@ -122,6 +85,7 @@ ev_defense = ev_cols[2].slider("Defense", min_value=0, max_value=252, step=4, va
 ev_sp_atk = ev_cols[3].slider("Sp. Atk", min_value=0, max_value=252, step=4, value=0)
 ev_sp_def = ev_cols[4].slider("Sp. Def", min_value=0, max_value=252, step=4, value=0)
 ev_speed = ev_cols[5].slider("Speed", min_value=0, max_value=252, step=4, value=0)
+
 
 total_ev_allocated = ev_hp + ev_attack + ev_defense + ev_sp_atk + ev_sp_def + ev_speed
 if total_ev_allocated > 510:
