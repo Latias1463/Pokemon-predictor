@@ -7,33 +7,38 @@ from sklearn.model_selection import GridSearchCV
 
 class PokemonStatsPredictor:
     def __init__(self):
-        self.models = {
-            'HP': DecisionTreeRegressor(random_state=42),
-            'Attack': DecisionTreeRegressor(random_state=42),
-            'Defense': DecisionTreeRegressor(random_state=42),
-            'Sp. Atk': DecisionTreeRegressor(random_state=42),
-            'Sp. Def': DecisionTreeRegressor(random_state=42),
-            'Speed': DecisionTreeRegressor(random_state=42),
-        }
+        self.models = None
         self.expected_columns = None
-        self.grid_search = False  # Set to True if you want to perform Grid Search
+        self.load_models()
 
-    def train(self, X_train, y_train):
-        self.expected_columns = X_train.columns
-        for stat, model in self.models.items():
-            if self.grid_search:
-                param_grid = {
-                    'max_depth': [3, 5, 10],
-                    'min_samples_split': [2, 5, 10]
-                }
-                grid_search = GridSearchCV(model, param_grid, cv=5, scoring='neg_mean_squared_error')
-                grid_search.fit(X_train, y_train[stat])
-                best_model = grid_search.best_estimator_
-                self.models[stat] = best_model
-            else:
-                model.fit(X_train, y_train[stat])
+    def load_models(self):
+        try:
+            model_data = joblib.load('pokemon_meta_model.joblib')
+            self.models = model_data.models
+            self.expected_columns = model_data.expected_columns
+
+            if not isinstance(self.models, dict):
+                raise AttributeError("The loaded model does not contain a valid 'models' attribute.")
+            if not isinstance(self.expected_columns, list):
+                raise AttributeError("The loaded 'expected_columns' attribute is not a list or is empty.")
+
+            for stat, model in self.models.items():
+                if not hasattr(model, "predict"):
+                    raise AttributeError(f"Model for {stat} is not a valid estimator.")
+            
+            print("Models and expected columns loaded successfully.")
+        except FileNotFoundError as e:
+            print(f"Error loading models: {e}")
+            self.models = {}
+            self.expected_columns = []
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            raise
 
     def predict(self, X_test):
+        if not isinstance(self.models, dict):
+            raise AttributeError("The 'models' attribute is not a dictionary.")
+        
         predictions = {}
         for stat, model in self.models.items():
             predictions[stat] = model.predict(X_test)
