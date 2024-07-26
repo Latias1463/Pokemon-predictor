@@ -52,13 +52,7 @@ df['Type 2'] = df['Type 2'].str.lower()
 required_columns = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']
 
 
-# Handle missing values (if any)
-missing_data = df.isnull().sum()
-st.write("### Missing Data")
-st.write(missing_data)
 
-# Data Cleaning
-df.fillna(df.median(), inplace=True)
 st.title("Pokémon Stats Predictor")
 
 st.markdown("""
