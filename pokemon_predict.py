@@ -2,74 +2,61 @@ import pandas as pd
 import streamlit as st
 import joblib
 import math
-
-import joblib
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import GridSearchCV
 
 class PokemonStatsPredictor:
     def __init__(self):
-        self.models = None
+        self.models = {
+            'HP': DecisionTreeRegressor(random_state=42),
+            'Attack': DecisionTreeRegressor(random_state=42),
+            'Defense': DecisionTreeRegressor(random_state=42),
+            'Sp. Atk': DecisionTreeRegressor(random_state=42),
+            'Sp. Def': DecisionTreeRegressor(random_state=42),
+            'Speed': DecisionTreeRegressor(random_state=42),
+        }
         self.expected_columns = None
-        self.load_models()
+        self.grid_search = False  # Set to True if you want to perform Grid Search
 
-    def load_models(self):
-        try:
-            self.models = joblib.load('pokemon_meta_model.joblib')
-            self.expected_columns = joblib.load('expected_columns.joblib')
-
-            # Debug: Print detailed information about the loaded models
-            print(f"Loaded models type: {type(self.models)}")
-            print(f"Loaded models content: {self.models}")
-            print(f"Loaded expected_columns type: {type(self.expected_columns)}")
-            print(f"Loaded expected_columns content: {self.expected_columns}")
-
-            # Check if models is a dictionary
-            if not isinstance(self.models, dict):
-                raise AttributeError("The loaded model does not contain a valid 'models' attribute.")
-            if not isinstance(self.expected_columns, list):
-                raise AttributeError("The loaded 'expected_columns' attribute is not a list or is empty.")
-            
-            print("Models and expected columns loaded successfully.")
-        except FileNotFoundError as e:
-            print(f"Error loading models: {e}")
-            self.models = {}
-            self.expected_columns = []
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-            raise
+    def train(self, X_train, y_train):
+        self.expected_columns = X_train.columns
+        for stat, model in self.models.items():
+            if self.grid_search:
+                param_grid = {
+                    'max_depth': [3, 5, 10],
+                    'min_samples_split': [2, 5, 10]
+                }
+                grid_search = GridSearchCV(model, param_grid, cv=5, scoring='neg_mean_squared_error')
+                grid_search.fit(X_train, y_train[stat])
+                best_model = grid_search.best_estimator_
+                self.models[stat] = best_model
+            else:
+                model.fit(X_train, y_train[stat])
 
     def predict(self, X_test):
-        if not isinstance(self.models, dict):
-            raise AttributeError("The 'models' attribute is not a dictionary.")
-        
         predictions = {}
         for stat, model in self.models.items():
-            if model:
-                predictions[stat] = model.predict(X_test)
-            else:
-                predictions[stat] = [0]  # Default to 0 if model is missing
+            predictions[stat] = model.predict(X_test)
         return predictions
-
-if __name__ == "__main__":
-    predictor = PokemonStatsPredictor()
 
 # Load and preprocess the dataset for reference (not for training)
 df = pd.read_csv("Pokemon.csv")
 df['Type 1'] = df['Type 1'].str.lower()
 df['Type 2'] = df['Type 2'].str.lower()
+required_columns = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']
 
 st.title("Pokémon Stats Predictor")
 
 st.markdown("""
-This is the Pokémon Stats Predictor. This tool helps you predict the stats of a hypothetical Pokémon based on their attributes.
+Welcome to the Pokémon Stats Predictor! This tool helps you predict the stats of a hypothetical Pokémon based on various attributes.
 """)
-
-
 
 st.header("Pokémon Characteristics")
 st.subheader("Type Selection")
-types = list(df['Type 1'].unique())
-type_1 = st.selectbox("Select the primary type:", options=types, index=0).lower()
-type_2 = st.selectbox("Select the secondary type (if any):", options=["None"] + types, index=0).lower()
+
+cols = st.columns(2)
+type_1 = cols[0].selectbox("Select the primary type:", options=df['Type 1'].unique(), index=0).lower()
+type_2 = cols[1].selectbox("Select the secondary type (if any):", options=["None"] + list(df['Type 1'].unique()), index=0).lower()
 if type_2 == "none":
     type_2 = None
 
@@ -78,47 +65,33 @@ generation = st.slider("Select the generation (1-9):", min_value=1, max_value=9,
 is_legendary = st.radio("Is the Pokémon legendary?", ["Yes", "No"]).lower() == 'yes'
 
 st.header("Individual Values (IVs)")
-st.markdown("**IVs range from 0 to 31 and contribute to the potential of your Pokémon's stats.**")
-cols = st.columns(3)
-iv_hp = cols[0].slider("Select IV for HP (0-31):", min_value=0, max_value=31, value=0)
-iv_attack = cols[1].slider("Select IV for Attack (0-31):", min_value=0, max_value=31, value=0)
-iv_defense = cols[2].slider("Select IV for Defense (0-31):", min_value=0, max_value=31, value=0)
-iv_sp_atk = cols[0].slider("Select IV for Sp. Atk (0-31):", min_value=0, max_value=31, value=0)
-iv_sp_def = cols[1].slider("Select IV for Sp. Def (0-31):", min_value=0, max_value=31, value=0)
-iv_speed = cols[2].slider("Select IV for Speed (0-31):", min_value=0, max_value=31, value=0)
+st.markdown("IVs range from 0 to 31 and contribute to the potential of your Pokémon's stats.")
+iv_cols = st.columns(6)
+iv_hp = iv_cols[0].slider("HP", min_value=0, max_value=31, value=0)
+iv_attack = iv_cols[1].slider("Attack", min_value=0, max_value=31, value=0)
+iv_defense = iv_cols[2].slider("Defense", min_value=0, max_value=31, value=0)
+iv_sp_atk = iv_cols[3].slider("Sp. Atk", min_value=0, max_value=31, value=0)
+iv_sp_def = iv_cols[4].slider("Sp. Def", min_value=0, max_value=31, value=0)
+iv_speed = iv_cols[5].slider("Speed", min_value=0, max_value=31, value=0)
 
-# Collecting IVs in a dictionary
-iv_values = {
-    'HP': iv_hp,
-    'Attack': iv_attack,
-    'Defense': iv_defense,
-    'Sp. Atk': iv_sp_atk,
-    'Sp. Def': iv_sp_def,
-    'Speed': iv_speed,
-}
+iv_values = {'HP': iv_hp, 'Attack': iv_attack, 'Defense': iv_defense, 'Sp. Atk': iv_sp_atk, 'Sp. Def': iv_sp_def, 'Speed': iv_speed}
 
 st.header("Effort Values (EVs)")
-st.markdown("**Total EVs across all stats cannot exceed 510. Each stat can receive up to 252 EVs, and EVs can be set in increments of 4.**")
-ev_hp = st.slider("Select EV for HP (0-252):", min_value=0, max_value=252, step=4, value=0)
-ev_attack = st.slider("Select EV for Attack (0-252):", min_value=0, max_value=252, step=4, value=0)
-ev_defense = st.slider("Select EV for Defense (0-252):", min_value=0, max_value=252, step=4, value=0)
-ev_sp_atk = st.slider("Select EV for Sp. Atk (0-252):", min_value=0, max_value=252, step=4, value=0)
-ev_sp_def = st.slider("Select EV for Sp. Def (0-252):", min_value=0, max_value=252, step=4, value=0)
-ev_speed = st.slider("Select EV for Speed (0-252):", min_value=0, max_value=252, step=4, value=0)
+st.markdown("Total EVs across all stats cannot exceed 510. Each stat can receive up to 252 EVs, and EVs can be set in increments of 4.")
+ev_cols = st.columns(6)
+ev_hp = ev_cols[0].slider("HP", min_value=0, max_value=252, step=4, value=0)
+ev_attack = ev_cols[1].slider("Attack", min_value=0, max_value=252, step=4, value=0)
+ev_defense = ev_cols[2].slider("Defense", min_value=0, max_value=252, step=4, value=0)
+ev_sp_atk = ev_cols[3].slider("Sp. Atk", min_value=0, max_value=252, step=4, value=0)
+ev_sp_def = ev_cols[4].slider("Sp. Def", min_value=0, max_value=252, step=4, value=0)
+ev_speed = ev_cols[5].slider("Speed", min_value=0, max_value=252, step=4, value=0)
+
 
 total_ev_allocated = ev_hp + ev_attack + ev_defense + ev_sp_atk + ev_sp_def + ev_speed
 if total_ev_allocated > 510:
     st.warning(f"Total EVs allocated exceed the limit of 510. Current total: {total_ev_allocated}")
 
-# Collecting EVs in a dictionary
-ev_values = {
-    'HP': ev_hp,
-    'Attack': ev_attack,
-    'Defense': ev_defense,
-    'Sp. Atk': ev_sp_atk,
-    'Sp. Def': ev_sp_def,
-    'Speed': ev_speed,
-}
+ev_values = {'HP': ev_hp, 'Attack': ev_attack, 'Defense': ev_defense, 'Sp. Atk': ev_sp_atk, 'Sp. Def': ev_sp_def, 'Speed': ev_speed}
 
 st.header("Nature Selection")
 nature = st.selectbox("Select Nature:", [
@@ -129,6 +102,7 @@ nature = st.selectbox("Select Nature:", [
     'Calm', 'Gentle', 'Sassy', 'Careful', 'Quirky'
 ])
 
+
 nature_effects = {
     'Hardy': (None, None), 'Lonely': ('Attack', 'Defense'), 'Brave': ('Attack', 'Speed'), 'Adamant': ('Attack', 'Sp. Atk'), 'Naughty': ('Attack', 'Sp. Def'),
     'Bold': ('Defense', 'Attack'), 'Docile': (None, None), 'Relaxed': ('Defense', 'Speed'), 'Impish': ('Defense', 'Sp. Atk'), 'Lax': ('Defense', 'Sp. Def'),
@@ -138,19 +112,23 @@ nature_effects = {
 }
 
 # Function to apply nature adjustments
-def apply_nature(stat_name, base_value, iv_value, ev_value):
+# Function to apply nature adjustments
+def apply_nature(stat_name, base_value, iv_value, ev_value, is_worst=False, is_best=False):
     increase, decrease = nature_effects[nature]
-    nature_multiplier = 1.1 if increase == stat_name else 0.9 if decrease == stat_name else 1.0
+    if is_worst:
+        nature_multiplier = 0.9 
+    elif is_best:
+        nature_multiplier = 1.1
+    else:
+        nature_multiplier = 1.1 if increase == stat_name else 1.0
     
     if stat_name == 'HP':
-        user_predicted_stat = (((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100) + 100 + 10
+        user_predicted_stat = math.floor((((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100) + 100 + 10)
     else:
-        user_predicted_stat = (((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100 + 5) * nature_multiplier
+        user_predicted_stat = math.floor((((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100 + 5) * nature_multiplier)
     
     return user_predicted_stat
 
-
-# Main prediction and display logic
 # Main prediction and display logic
 if st.button("Predict Stats"):
     # Filter the dataset based on user input
@@ -223,16 +201,15 @@ if st.button("Predict Stats"):
     total_base, total_best, total_worst, total_adjusted = 0, 0, 0, 0
     for stat in predicted_stats:
         base_stat = predicted_stats[stat][0]
-        best_stat = apply_nature(stat, base_stat, 31, 252)  # IVs max at 31, EVs max at 252
-        worst_stat = apply_nature(stat, base_stat, 0, 0)    # IVs min at 0, EVs at 0
+        best_stat = apply_nature(stat, base_stat, 31, 252, is_best=True)  # IVs max at 31, EVs max at 252
+        worst_stat = apply_nature(stat, base_stat, 0, 0, is_worst=True)    # IVs min at 0, EVs at 0
         actual_stat = apply_nature(stat, base_stat, iv_values[stat], ev_values[stat])
-
         st.markdown(f"""
         **{stat}:**
-        - **Predicted base stat:** {base_stat:.2f}
-        - **Best:** {best_stat:.2f}
-        - **Worst:** {worst_stat:.2f}
-        - **Adjusted:** {actual_stat:.2f} (based on selected IVs, EVs, and Nature)
+        - **Predicted base stat:** {base_stat}
+        - **Best:** {best_stat}
+        - **Worst:** {worst_stat}
+        - **Adjusted:** {actual_stat} (based on selected IVs, EVs, and Nature)
         """)
 
         total_base += base_stat
@@ -240,7 +217,5 @@ if st.button("Predict Stats"):
         total_worst += worst_stat
         total_adjusted += actual_stat
 
-    st.write(f"**Total Predicted Base Stats:** {total_base:.2f}")
-    st.write(f"**Total Best Possible Stats:** {total_best:.2f}")
-    st.write(f"**Total Worst Possible Stats:** {total_worst:.2f}")
-    st.write(f"**Total Adjusted Stats:** {total_adjusted:.2f}")
+    st.write(f"**Total Predicted Base Stats:** {total_base}")
+
