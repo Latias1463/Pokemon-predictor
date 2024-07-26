@@ -1,4 +1,7 @@
+import pandas as pd
+import streamlit as st
 import joblib
+import math
 
 class PokemonStatsPredictor:
     def __init__(self):
