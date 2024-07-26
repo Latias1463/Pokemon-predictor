@@ -3,17 +3,54 @@ import streamlit as st
 import joblib
 import math
 
+import joblib
+
 class PokemonStatsPredictor:
     def __init__(self):
-        self.models = joblib.load('pokemon_meta_model.joblib')
-        # Load expected columns from a saved file (this should have been saved during training)
-        self.expected_columns = joblib.load('expected_columns.joblib')
+        self.models = None
+        self.expected_columns = None
+        self.load_models()
+
+    def load_models(self):
+        try:
+            self.models = joblib.load('pokemon_meta_model.joblib')
+            self.expected_columns = joblib.load('expected_columns.joblib')
+
+            # Debug: Print detailed information about the loaded models
+            print(f"Loaded models type: {type(self.models)}")
+            print(f"Loaded models content: {self.models}")
+            print(f"Loaded expected_columns type: {type(self.expected_columns)}")
+            print(f"Loaded expected_columns content: {self.expected_columns}")
+
+            # Check if models is a dictionary
+            if not isinstance(self.models, dict):
+                raise AttributeError("The loaded model does not contain a valid 'models' attribute.")
+            if not isinstance(self.expected_columns, list):
+                raise AttributeError("The loaded 'expected_columns' attribute is not a list or is empty.")
+            
+            print("Models and expected columns loaded successfully.")
+        except FileNotFoundError as e:
+            print(f"Error loading models: {e}")
+            self.models = {}
+            self.expected_columns = []
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            raise
 
     def predict(self, X_test):
+        if not isinstance(self.models, dict):
+            raise AttributeError("The 'models' attribute is not a dictionary.")
+        
         predictions = {}
         for stat, model in self.models.items():
-            predictions[stat] = model.predict(X_test)
+            if model:
+                predictions[stat] = model.predict(X_test)
+            else:
+                predictions[stat] = [0]  # Default to 0 if model is missing
         return predictions
+
+if __name__ == "__main__":
+    predictor = PokemonStatsPredictor()
 
 # Load and preprocess the dataset for reference (not for training)
 df = pd.read_csv("Pokemon.csv")
@@ -25,6 +62,8 @@ st.title("Pokémon Stats Predictor")
 st.markdown("""
 This is the Pokémon Stats Predictor. This tool helps you predict the stats of a hypothetical Pokémon based on their attributes.
 """)
+
+
 
 st.header("Pokémon Characteristics")
 st.subheader("Type Selection")
@@ -109,6 +148,7 @@ def apply_nature(stat_name, base_value, iv_value, ev_value):
         user_predicted_stat = (((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100 + 5) * nature_multiplier
     
     return user_predicted_stat
+
 
 # Main prediction and display logic
 # Main prediction and display logic
