@@ -142,9 +142,9 @@ def apply_nature(stat_name, base_value, iv_value, ev_value, is_worst=False):
         nature_multiplier = 1.1 if increase == stat_name else 1.0
     
     if stat_name == 'HP':
-        user_predicted_stat = (((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100) + 100 + 10
+        user_predicted_stat = math.floor((((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100) + 100 + 10)
     else:
-        user_predicted_stat = (((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100 + 5) * nature_multiplier
+        user_predicted_stat = math.floor((((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100 + 5) * nature_multiplier)
     
     return user_predicted_stat
 
@@ -223,7 +223,6 @@ if st.button("Predict Stats"):
         best_stat = apply_nature(stat, base_stat, 31, 252)  # IVs max at 31, EVs max at 252
         worst_stat = apply_nature(stat, base_stat, 0, 0, is_worst=True)    # IVs min at 0, EVs at 0
         actual_stat = apply_nature(stat, base_stat, iv_values[stat], ev_values[stat])
-
         st.markdown(f"""
         **{stat}:**
         - **Predicted base stat:** {base_stat:.2f}
