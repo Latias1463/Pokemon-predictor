@@ -176,7 +176,7 @@ if st.button("Predict Stats"):
     input_df_encoded = input_df_encoded.reindex(columns=predictor.expected_columns, fill_value=0)
     
     # Predict the individual stats for the hypothetical Pokémon
-   predicted_stats = predictor.predict(input_df_encoded)
+    predicted_stats = predictor.predict(input_df_encoded)
     
     # Display the predicted stats
     st.subheader("Predicted Stats")
