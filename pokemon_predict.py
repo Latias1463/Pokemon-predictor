@@ -16,11 +16,13 @@ class PokemonStatsPredictor:
 
             # Debug: Check the type and contents of the loaded objects
             print(f"Loaded models type: {type(self.models)}")
+            print(f"Loaded models content: {self.models}")
             print(f"Loaded expected_columns type: {type(self.expected_columns)}")
+            print(f"Loaded expected_columns content: {self.expected_columns}")
             
             # Check if models is a dictionary
             if not isinstance(self.models, dict):
-                raise AttributeError("The loaded model does not contain a valid 'models' attribute. Models type: " + str(type(self.models)))
+                raise AttributeError(f"The loaded model does not contain a valid 'models' attribute. Models type: {type(self.models)}")
             if not self.expected_columns:
                 raise AttributeError("The loaded 'expected_columns' attribute is missing or empty.")
             
