@@ -133,9 +133,13 @@ nature_effects = {
 }
 
 # Function to apply nature adjustments
-def apply_nature(stat_name, base_value, iv_value, ev_value):
+# Function to apply nature adjustments
+def apply_nature(stat_name, base_value, iv_value, ev_value, is_worst=False):
     increase, decrease = nature_effects[nature]
-    nature_multiplier = 1.1 if increase == stat_name else 0.9 if decrease == stat_name else 1.0
+    if is_worst:
+        nature_multiplier = 0.9 if decrease == stat_name else 1.0
+    else:
+        nature_multiplier = 1.1 if increase == stat_name else 1.0
     
     if stat_name == 'HP':
         user_predicted_stat = (((2 * base_value + iv_value + math.floor(ev_value / 4)) * 100) / 100) + 100 + 10
@@ -144,8 +148,6 @@ def apply_nature(stat_name, base_value, iv_value, ev_value):
     
     return user_predicted_stat
 
-
-# Main prediction and display logic
 # Main prediction and display logic
 if st.button("Predict Stats"):
     # Filter the dataset based on user input
@@ -219,7 +221,7 @@ if st.button("Predict Stats"):
     for stat in predicted_stats:
         base_stat = predicted_stats[stat][0]
         best_stat = apply_nature(stat, base_stat, 31, 252)  # IVs max at 31, EVs max at 252
-        worst_stat = apply_nature(stat, base_stat, 0, 0)    # IVs min at 0, EVs at 0
+        worst_stat = apply_nature(stat, base_stat, 0, 0, is_worst=True)    # IVs min at 0, EVs at 0
         actual_stat = apply_nature(stat, base_stat, iv_values[stat], ev_values[stat])
 
         st.markdown(f"""
@@ -239,3 +241,4 @@ if st.button("Predict Stats"):
     st.write(f"**Total Best Possible Stats:** {total_best:.2f}")
     st.write(f"**Total Worst Possible Stats:** {total_worst:.2f}")
     st.write(f"**Total Adjusted Stats:** {total_adjusted:.2f}")
+
