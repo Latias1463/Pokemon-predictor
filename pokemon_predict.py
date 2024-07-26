@@ -134,10 +134,12 @@ nature_effects = {
 
 # Function to apply nature adjustments
 # Function to apply nature adjustments
-def apply_nature(stat_name, base_value, iv_value, ev_value, is_worst=False):
+def apply_nature(stat_name, base_value, iv_value, ev_value, is_worst=False, is_best=False):
     increase, decrease = nature_effects[nature]
     if is_worst:
         nature_multiplier = 0.9 
+    elif is_best:
+        nature_multiplier = 1.1
     else:
         nature_multiplier = 1.1 if increase == stat_name else 1.0
     
@@ -220,7 +222,7 @@ if st.button("Predict Stats"):
     total_base, total_best, total_worst, total_adjusted = 0, 0, 0, 0
     for stat in predicted_stats:
         base_stat = predicted_stats[stat][0]
-        best_stat = apply_nature(stat, base_stat, 31, 252)  # IVs max at 31, EVs max at 252
+        best_stat = apply_nature(stat, base_stat, 31, 252, is_best=True)  # IVs max at 31, EVs max at 252
         worst_stat = apply_nature(stat, base_stat, 0, 0, is_worst=True)    # IVs min at 0, EVs at 0
         actual_stat = apply_nature(stat, base_stat, iv_values[stat], ev_values[stat])
         st.markdown(f"""
