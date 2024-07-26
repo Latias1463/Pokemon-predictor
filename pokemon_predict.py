@@ -10,20 +10,23 @@ class PokemonStatsPredictor:
         self.load_models()
 
     def load_models(self):
-        # Load the models and expected columns from joblib files
         try:
             self.models = joblib.load('pokemon_meta_model.joblib')
             self.expected_columns = joblib.load('expected_columns.joblib')
-            # Check if models is a dictionary
+
+            # Debug: Check the content of models and expected_columns
             if not isinstance(self.models, dict):
                 raise AttributeError("The loaded model does not contain a valid 'models' attribute.")
+            if not self.expected_columns:
+                raise AttributeError("The loaded 'expected_columns' attribute is missing or empty.")
+            
+            print("Models and expected columns loaded successfully.")
         except FileNotFoundError as e:
             print(f"Error loading models: {e}")
             self.models = {}
             self.expected_columns = []
 
     def predict(self, X_test):
-        # Ensure models attribute is correctly loaded and is a dictionary
         if not isinstance(self.models, dict):
             raise AttributeError("The 'models' attribute is not a dictionary.")
 
@@ -35,7 +38,6 @@ class PokemonStatsPredictor:
                 predictions[stat] = [0]  # Default to 0 if model is missing
         return predictions
 
-
 # Load and preprocess the dataset for reference (not for training)
 df = pd.read_csv("Pokemon.csv")
 df['Type 1'] = df['Type 1'].str.lower()
@@ -46,6 +48,8 @@ st.title("Pokémon Stats Predictor")
 st.markdown("""
 This is the Pokémon Stats Predictor. This tool helps you predict the stats of a hypothetical Pokémon based on their attributes.
 """)
+
+
 
 st.header("Pokémon Characteristics")
 st.subheader("Type Selection")
